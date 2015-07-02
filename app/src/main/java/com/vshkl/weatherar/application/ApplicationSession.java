@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.WindowManager;
 
 import com.qualcomm.vuforia.CameraDevice;
 import com.qualcomm.vuforia.Matrix44F;
@@ -17,6 +18,11 @@ import com.qualcomm.vuforia.VideoBackgroundConfig;
 import com.qualcomm.vuforia.VideoMode;
 import com.qualcomm.vuforia.Vuforia;
 import com.qualcomm.vuforia.Vuforia.UpdateCallbackInterface;
+import com.vshkl.weatherar.R;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 public class ApplicationSession implements UpdateCallbackInterface{
 
@@ -40,7 +46,7 @@ public class ApplicationSession implements UpdateCallbackInterface{
 
     private Matrix44F projectionMatrix;
 
-    private Object shutdownLock = new Object();
+    private final Object shutdownLock = new Object();
 
     private InitVuforia initVuforia;
     private LoadTracker loadTracker;
@@ -56,29 +62,138 @@ public class ApplicationSession implements UpdateCallbackInterface{
     public void initAR(Activity activity, int screenOrientation) {
         this.activity = activity;
 
+        ApplicationException exception = null;
 
+        activity.setRequestedOrientation(screenOrientation);
+        updateActivityOrientation();
+        storeScreenDimensions();
+
+        activity.getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        vuforiaFlag = Vuforia.GL_20;
+
+        if (initVuforia != null) {
+            exception = new ApplicationException(
+                    ApplicationException.VUFORIA_ALREADY_INITIALIZATED, "Whoops!");
+            Log.e(TAG, "VUFORIA_ALREADY_INITIALIZATED!");
+        }
+
+        if (exception == null) {
+            try {
+                initVuforia = new InitVuforia();
+                initVuforia.execute();
+            } catch (Exception e) {
+                exception = new ApplicationException(
+                        ApplicationException.INITIALIZATION_FAILURE, "Whoops!");
+                Log.e(TAG, "INITIALIZATION_FAILURE!");
+            }
+        }
+
+        if (exception != null) {
+            control.onInitARDone(exception);
+        }
     }
 
-    public void runAR(int camera) {
+    public void startAR(int camera) throws ApplicationException{
 
+        if(isCameraRunning) {
+            Log.e(TAG, "CAMERA_INITIALIZATION_FAILURE!");
+            throw new ApplicationException(
+                    ApplicationException.CAMERA_INITIALIZATION_FAILURE, "Whoops!");
+        }
+
+        camera = camera;
+        if (!CameraDevice.getInstance().init(camera)) {
+            Log.e(TAG, "CAMERA_INITIALIZATION_FAILURE!");
+            throw new ApplicationException(
+                    ApplicationException.CAMERA_INITIALIZATION_FAILURE, "Whoops");
+        }
+
+        configureVideoBackground();
+
+        if (!CameraDevice.getInstance().selectVideoMode(CameraDevice.MODE.MODE_DEFAULT)) {
+            Log.e(TAG, "CAMERA_INITIALIZATION_FAILURE!");
+            throw new ApplicationException(
+                    ApplicationException.CAMERA_INITIALIZATION_FAILURE, "Whoops");
+        }
+
+        if (!CameraDevice.getInstance().start()) {
+            Log.e(TAG, "CAMERA_INITIALIZATION_FAILURE!");
+            throw new ApplicationException(
+                    ApplicationException.CAMERA_INITIALIZATION_FAILURE, "Whoops");
+        }
+
+        setProjectionMatrix();
+
+        control.doStartTrackers();
+
+        isCameraRunning = true;
+
+        if(!CameraDevice.getInstance().setFocusMode(CameraDevice.FOCUS_MODE.FOCUS_MODE_TRIGGERAUTO)) {
+            CameraDevice.getInstance().setFocusMode(CameraDevice.FOCUS_MODE.FOCUS_MODE_NORMAL);
+        }
     }
 
-    public void pauseAR() {
-
+    public void pauseAR() throws ApplicationException {
+        if (isStarted) {
+            stopCamera();
+        }
+        Vuforia.onPause();
     }
 
-    public void stopAR() {
+    public void stopAR() throws ApplicationException {
+        if (initVuforia != null && initVuforia.getStatus() != InitVuforia.Status.FINISHED) {
+            initVuforia.cancel(true);
+            initVuforia = null;
+        }
 
+        if (loadTracker != null && loadTracker.getStatus() != LoadTracker.Status.FINISHED) {
+            loadTracker.cancel(true);
+            loadTracker = null;
+        }
+
+        initVuforia = null;
+        loadTracker = null;
+
+        isStarted = false;
+
+        stopCamera();
+
+        synchronized (shutdownLock) {
+
+            boolean unloadTrackersResult;
+            boolean deinitTrackersResult;
+
+            unloadTrackersResult = control.doUnloadTrackersData();
+
+            deinitTrackersResult = control.doDeinitTrackers();
+
+            Vuforia.deinit();
+
+            if (!unloadTrackersResult)
+                throw new ApplicationException(
+                        ApplicationException.UNLOADING_TRACKERS_FAILURE,
+                        "Failed to unload trackers\' data");
+
+            if (!deinitTrackersResult)
+                throw new ApplicationException(
+                        ApplicationException.TRACKERS_DEINITIALIZATION_FAILURE,
+                        "Failed to deinitialize trackers");
+        }
     }
 
-    public void resumeAR() {
-
+    public void resumeAR() throws ApplicationException {
+        Vuforia.onResume();
+        if (isStarted) {
+            startAR(camera);
+        }
     }
 
     public boolean isARRuning() {
         return isStarted;
     }
-
 
     //========== Lifecycle ========================================================================
 
@@ -168,6 +283,24 @@ public class ApplicationSession implements UpdateCallbackInterface{
         Renderer.getInstance().setVideoBackgroundConfig(config);
     }
 
+    private String getLicenseKey() {
+        Resources resources = activity.getResources();
+        InputStream stream = resources.openRawResource(R.raw.license);
+        String licenseKey = "";
+        Properties properties = new Properties();
+        try {
+            properties.load(stream);
+            licenseKey = properties.getProperty("vuforia_license_key");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return licenseKey;
+    }
+
+    public Matrix44F getProjectionMatrix() {
+        return projectionMatrix;
+    }
+
     public void setProjectionMatrix() {
         projectionMatrix = Tool.getProjectionGL(
                 CameraDevice.getInstance().getCameraCalibration(), 10.0f, 5000.0f);
@@ -198,7 +331,7 @@ public class ApplicationSession implements UpdateCallbackInterface{
 
     @Override
     public void QCAR_onUpdate(State state) {
-
+        control.onQCARUpdate(state);
     }
 
     //========== Asynchronous processing ==========================================================
@@ -210,8 +343,7 @@ public class ApplicationSession implements UpdateCallbackInterface{
         @Override
         protected Boolean doInBackground(Void... params) {
             synchronized (shutdownLock) {
-                Vuforia.setInitParameters(activity, vuforiaFlag, "");
-
+                Vuforia.setInitParameters(activity, vuforiaFlag, getLicenseKey());
                 do {
                     progress = Vuforia.init();
                     publishProgress(progress);
