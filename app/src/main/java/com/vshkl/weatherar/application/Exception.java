@@ -1,9 +1,18 @@
+/*===============================================================================
+Copyright (c) 2012-2014 Qualcomm Connected Experiences, Inc. All Rights Reserved.
+
+Vuforia is a trademark of QUALCOMM Incorporated, registered in the United States 
+and other countries. Trademarks of QUALCOMM Incorporated are used with permission.
+===============================================================================*/
+
 package com.vshkl.weatherar.application;
 
-public class ApplicationException extends Exception{
 
+public class Exception extends java.lang.Exception
+{
+    
     private static final long serialVersionUID = 2L;
-
+    
     public static final int INITIALIZATION_FAILURE = 0;
     public static final int VUFORIA_ALREADY_INITIALIZATED = 1;
     public static final int TRACKERS_INITIALIZATION_FAILURE = 2;
@@ -13,11 +22,11 @@ public class ApplicationException extends Exception{
     public static final int CAMERA_INITIALIZATION_FAILURE = 6;
     public static final int SET_FOCUS_MODE_FAILURE = 7;
     public static final int ACTIVATE_FLASH_FAILURE = 8;
-
+    
     private int mCode = -1;
     private String mString = "";
 
-    public ApplicationException(int code, String description)
+    public Exception(int code, String description)
     {
         super(description);
         mCode = code;
@@ -28,7 +37,7 @@ public class ApplicationException extends Exception{
     {
         return mCode;
     }
-
+    
     public String getString()
     {
         return mString;
