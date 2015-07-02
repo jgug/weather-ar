@@ -1,17 +1,17 @@
 package com.vshkl.weatherar.views;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.support.v7.app.AppCompatActivity;
 
 import com.vshkl.weatherar.R;
 
-public class CameraActivity extends ActionBarActivity {
+import org.androidannotations.annotations.EActivity;
+
+@EActivity(R.layout.activity_camera)
+public class CameraActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_camera);
     }
 }
