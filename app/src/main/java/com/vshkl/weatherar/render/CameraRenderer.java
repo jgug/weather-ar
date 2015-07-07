@@ -1,7 +1,9 @@
 package com.vshkl.weatherar.render;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
@@ -9,6 +11,8 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.qualcomm.vuforia.Matrix44F;
@@ -110,6 +114,8 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             float[] modelViewProjection = new float[16];
             Matrix.translateM(modelViewMatrix, 0, 0.0f, 0.0f, scale);
             Matrix.scaleM(modelViewMatrix, 0, scale, scale, scale);
+            //TODO: Replace 90 degree rotation with right verticeses
+            Matrix.rotateM(modelViewMatrix,0, 90, 0.0f, 0.0f, scale);
             Matrix.multiplyMM(modelViewProjection, 0, Session
                     .getProjectionMatrix().getData(), 0, modelViewMatrix, 0);
 
@@ -137,8 +143,8 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             GLES20.glDisableVertexAttribArray(vertexHandle);
             GLES20.glDisableVertexAttribArray(normalHandle);
             GLES20.glDisableVertexAttribArray(textureCoordHandle);
-            
-            Bitmap bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_4444);
+
+            Bitmap bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
             GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, createBitmapText(activity, bitmap, "Hello!"), 0);
             bitmap.recycle();
 
@@ -197,7 +203,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
 
         Drawable background = context.getResources().getDrawable(R.color.transparent);
         background.setAlpha(0);
-        background.setBounds(0, 0, 256, 256);
+        background.setBounds(0, 0, 512, 512);
         background.draw(canvas);
 
         Paint textPaint = new Paint();

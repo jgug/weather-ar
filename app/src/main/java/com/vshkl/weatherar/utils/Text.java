@@ -20,7 +20,18 @@ public class Text extends MeshObject {
     }
 
     private void setVerts() {
-        double[] PLANE_VERTICES = {-0.5, -0.5, 0.0, 0.5, -0.5, 0.0, 0.5, 0.5, 0.0, -0.5, 0.5, 0.0};
+//        double[] PLANE_VERTICES = {-1.0, -1.0, 0.0,
+//                                    1.0, -1.0, 0.0,
+//                                    1.0,  1.0, 0.0,
+//                                   -1.0,  1.0, 0.0};
+        double[] PLANE_VERTICES = {-1.0,  1.0, 0.0,
+                                    1.0,  1.0, 0.0,
+                                    1.0, -1.0, 0.0,
+                                   -1.0, -1.0, 0.0};
+//        double[] PLANE_VERTICES = {1.0, 1.0, 0.0,
+//                                -1.0, 1.0, 0.0,
+//                                -1.0, -1.0, 0.0,
+//                                1.0, -1.0, 0.0};
         vertBuff = fillBuffer(PLANE_VERTICES);
         verticesNumber = PLANE_VERTICES.length / 3;
     }
