@@ -1,8 +1,13 @@
 package com.vshkl.weatherar.views;
 
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -459,4 +464,6 @@ public class CameraActivity extends AppCompatActivity implements Control {
             }
         }
     }
+
+
 }

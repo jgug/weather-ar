@@ -1,7 +1,13 @@
 package com.vshkl.weatherar.render;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.Log;
 
@@ -12,6 +18,7 @@ import com.qualcomm.vuforia.Tool;
 import com.qualcomm.vuforia.TrackableResult;
 import com.qualcomm.vuforia.VIDEO_BACKGROUND_REFLECTION;
 import com.qualcomm.vuforia.Vuforia;
+import com.vshkl.weatherar.R;
 import com.vshkl.weatherar.application.Session;
 import com.vshkl.weatherar.utils.FrameShaders;
 import com.vshkl.weatherar.utils.Text;
@@ -43,7 +50,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
 
     private Text text;
 
-    static final float kObjectScale = 3.f;
+    static final float scale = 20.f;
 
     private CameraActivity activity;
 
@@ -101,9 +108,8 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             float[] modelViewMatrix = modelViewMatrix_Vuforia.getData();
 
             float[] modelViewProjection = new float[16];
-            Matrix.translateM(modelViewMatrix, 0, 0.0f, 0.0f, kObjectScale);
-            Matrix.scaleM(modelViewMatrix, 0, kObjectScale, kObjectScale,
-                    kObjectScale);
+            Matrix.translateM(modelViewMatrix, 0, 0.0f, 0.0f, scale);
+            Matrix.scaleM(modelViewMatrix, 0, scale, scale, scale);
             Matrix.multiplyMM(modelViewProjection, 0, Session
                     .getProjectionMatrix().getData(), 0, modelViewMatrix, 0);
 
@@ -131,6 +137,10 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             GLES20.glDisableVertexAttribArray(vertexHandle);
             GLES20.glDisableVertexAttribArray(normalHandle);
             GLES20.glDisableVertexAttribArray(textureCoordHandle);
+            
+            Bitmap bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_4444);
+            GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, createBitmapText(activity, bitmap, "Hello!"), 0);
+            bitmap.recycle();
 
             Utils.checkGLError("CameraActivity renderFrame");
         }
@@ -148,7 +158,6 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
 
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, Vuforia.requiresAlpha() ? 0.0f : 1.0f);
 
-        // Now generate the OpenGL texture objects and add settings
         for (Texture t : textures) {
             GLES20.glGenTextures(1, t.mTextureID, 0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, t.mTextureID[0]);
@@ -180,5 +189,24 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
 
     public void setTextures(Vector<Texture> textures) {
         this.textures = textures;
+    }
+
+    public Bitmap createBitmapText(Context context, Bitmap bitmap, String text) {
+        Canvas canvas = new Canvas(bitmap);
+        bitmap.eraseColor(0);
+
+        Drawable background = context.getResources().getDrawable(R.color.transparent);
+        background.setAlpha(0);
+        background.setBounds(0, 0, 256, 256);
+        background.draw(canvas);
+
+        Paint textPaint = new Paint();
+        textPaint.setTextSize(64);
+        textPaint.setAntiAlias(true);
+        textPaint.setARGB(0xff, 0xff, 0xff, 0xff);
+
+        canvas.drawText(text, 16, 112, textPaint);
+
+        return bitmap;
     }
 }
