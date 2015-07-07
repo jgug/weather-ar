@@ -25,7 +25,7 @@ public interface Control
 
     boolean doDeinitTrackers();
 
-    void onInitARDone(Exception e);
+    void onInitARDone(ExceptionAR e);
 
     void onQCARUpdate(State state);
     

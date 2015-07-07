@@ -60,7 +60,7 @@ public class Session implements UpdateCallbackInterface
     
     private int camera = CameraDevice.CAMERA.CAMERA_DEFAULT;
     
-    private Matrix44F projectionMatrix;
+    private static Matrix44F projectionMatrix;
     
     private boolean isPortrait = false;
 
@@ -70,10 +70,10 @@ public class Session implements UpdateCallbackInterface
         this.sessionControl = sessionControl;
     }
 
-    //========== Augmented Reaclity ===============================================================
+    //========== Augmented Reality ===============================================================
     
     public void initAR(Activity activity, int screenOrientation) {
-        Exception vuforiaException = null;
+        ExceptionAR vuforiaExceptionAR = null;
         this.activity = activity;
         
         if ((screenOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR)
@@ -94,40 +94,40 @@ public class Session implements UpdateCallbackInterface
 
         if (initVuforiaTask != null) {
             String logMessage = "Cannot initialize SDK twice";
-            vuforiaException = new Exception(Exception.VUFORIA_ALREADY_INITIALIZATED, logMessage);
+            vuforiaExceptionAR = new ExceptionAR(ExceptionAR.VUFORIA_ALREADY_INITIALIZATED, logMessage);
             Log.e(LOGTAG, logMessage);
         }
         
-        if (vuforiaException == null) {
+        if (vuforiaExceptionAR == null) {
             try {
                 initVuforiaTask = new InitVuforiaTask();
                 initVuforiaTask.execute();
             } catch (java.lang.Exception e) {
                 String logMessage = "Initializing Vuforia SDK failed";
-                vuforiaException = new Exception(Exception.INITIALIZATION_FAILURE, logMessage);
+                vuforiaExceptionAR = new ExceptionAR(ExceptionAR.INITIALIZATION_FAILURE, logMessage);
                 Log.e(LOGTAG, logMessage);
             }
         }
         
-        if (vuforiaException != null) {
-            sessionControl.onInitARDone(vuforiaException);
+        if (vuforiaExceptionAR != null) {
+            sessionControl.onInitARDone(vuforiaExceptionAR);
         }
     }
 
-    public void startAR(int camera) throws Exception
+    public void startAR(int camera) throws ExceptionAR
     {
         String error;
         if(isCameraRunning) {
         	error = "Camera already running, unable to open again";
         	Log.e(LOGTAG, error);
-            throw new Exception(Exception.CAMERA_INITIALIZATION_FAILURE, error);
+            throw new ExceptionAR(ExceptionAR.CAMERA_INITIALIZATION_FAILURE, error);
         }
         
         this.camera = camera;
         if (!CameraDevice.getInstance().init(camera)) {
             error = "Unable to open camera device: " + camera;
             Log.e(LOGTAG, error);
-            throw new Exception(Exception.CAMERA_INITIALIZATION_FAILURE, error);
+            throw new ExceptionAR(ExceptionAR.CAMERA_INITIALIZATION_FAILURE, error);
         }
         
         configureVideoBackground();
@@ -135,13 +135,13 @@ public class Session implements UpdateCallbackInterface
         if (!CameraDevice.getInstance().selectVideoMode(CameraDevice.MODE.MODE_DEFAULT)) {
             error = "Unable to set video mode";
             Log.e(LOGTAG, error);
-            throw new Exception(Exception.CAMERA_INITIALIZATION_FAILURE, error);
+            throw new ExceptionAR(ExceptionAR.CAMERA_INITIALIZATION_FAILURE, error);
         }
         
         if (!CameraDevice.getInstance().start()) {
             error = "Unable to start camera device: " + camera;
             Log.e(LOGTAG, error);
-            throw new Exception(Exception.CAMERA_INITIALIZATION_FAILURE, error);
+            throw new ExceptionAR(ExceptionAR.CAMERA_INITIALIZATION_FAILURE, error);
         }
         
         setProjectionMatrix();
@@ -156,9 +156,8 @@ public class Session implements UpdateCallbackInterface
         }
     }
 
-    public void stopAR() throws Exception
+    public void stopAR() throws ExceptionAR
     {
-        // Cancel potentially running tasks
         if (initVuforiaTask != null
             && initVuforiaTask.getStatus() != InitVuforiaTask.Status.FINISHED) {
             initVuforiaTask.cancel(true);
@@ -190,25 +189,25 @@ public class Session implements UpdateCallbackInterface
             Vuforia.deinit();
             
             if (!unloadTrackersResult)
-                throw new Exception(
-                    Exception.UNLOADING_TRACKERS_FAILURE,
+                throw new ExceptionAR(
+                    ExceptionAR.UNLOADING_TRACKERS_FAILURE,
                     "Failed to unload trackers\' data");
             
             if (!deinitTrackersResult)
-                throw new Exception(
-                    Exception.TRACKERS_DEINITIALIZATION_FAILURE,
+                throw new ExceptionAR(
+                    ExceptionAR.TRACKERS_DEINITIALIZATION_FAILURE,
                     "Failed to deinitialize trackers");
         }
     }
 
-    public void resumeAR() throws Exception {
+    public void resumeAR() throws ExceptionAR {
         Vuforia.onResume();
         if (isStarted) {
             startAR(camera);
         }
     }
 
-    public void pauseAR() throws Exception {
+    public void pauseAR() throws ExceptionAR {
         if (isStarted) {
             stopCamera();
         }
@@ -239,7 +238,7 @@ public class Session implements UpdateCallbackInterface
 
     //========== Utils ============================================================================
     
-    public Matrix44F getProjectionMatrix() {
+    public static Matrix44F getProjectionMatrix() {
         return projectionMatrix;
     }
 
@@ -329,12 +328,12 @@ public class Session implements UpdateCallbackInterface
         }
     }
 
-    private boolean setFocusMode(int mode) throws Exception {
+    private boolean setFocusMode(int mode) throws ExceptionAR {
         boolean result = CameraDevice.getInstance().setFocusMode(mode);
 
         if (!result) {
-            throw new Exception(
-                    Exception.SET_FOCUS_MODE_FAILURE,
+            throw new ExceptionAR(
+                    ExceptionAR.SET_FOCUS_MODE_FAILURE,
                     "Failed to set focus mode: " + mode);
         }
 
@@ -350,7 +349,8 @@ public class Session implements UpdateCallbackInterface
         config.setSynchronous(true);
         config.setPosition(new Vec2I(0, 0));
 
-        int xSize = 0, ySize = 0;
+        int xSize;
+        int ySize;
         if (isPortrait) {
             xSize = (int) (vm.getHeight() * (screenHeight / (float) vm
                     .getWidth()));
@@ -415,9 +415,8 @@ public class Session implements UpdateCallbackInterface
         }
 
         @Override
-        protected void onPostExecute(Boolean result)
-        {
-            Exception vuforiaException = null;
+        protected void onPostExecute(Boolean result) {
+            ExceptionAR vuforiaExceptionAR;
             
             if (result) {
                 Log.d(LOGTAG, "InitVuforiaTask.onPostExecute: Vuforia "
@@ -432,18 +431,18 @@ public class Session implements UpdateCallbackInterface
                         loadTrackerTask.execute();
                     } catch (java.lang.Exception e) {
                         String logMessage = "Loading tracking data set failed";
-                        vuforiaException = new Exception(
-                            Exception.LOADING_TRACKERS_FAILURE,
+                        vuforiaExceptionAR = new ExceptionAR(
+                            ExceptionAR.LOADING_TRACKERS_FAILURE,
                             logMessage);
                         Log.e(LOGTAG, logMessage);
-                        sessionControl.onInitARDone(vuforiaException);
+                        sessionControl.onInitARDone(vuforiaExceptionAR);
                     }
                     
                 } else {
-                    vuforiaException = new Exception(
-                        Exception.TRACKERS_INITIALIZATION_FAILURE,
+                    vuforiaExceptionAR = new ExceptionAR(
+                        ExceptionAR.TRACKERS_INITIALIZATION_FAILURE,
                         "Failed to initialize trackers");
-                    sessionControl.onInitARDone(vuforiaException);
+                    sessionControl.onInitARDone(vuforiaExceptionAR);
                 }
             } else {
                 String logMessage;
@@ -452,10 +451,10 @@ public class Session implements UpdateCallbackInterface
                 Log.e(LOGTAG, "InitVuforiaTask.onPostExecute: " + logMessage
                     + " Exiting.");
 
-                vuforiaException = new Exception(
-                    Exception.INITIALIZATION_FAILURE,
+                vuforiaExceptionAR = new ExceptionAR(
+                    ExceptionAR.INITIALIZATION_FAILURE,
                     logMessage);
-                sessionControl.onInitARDone(vuforiaException);
+                sessionControl.onInitARDone(vuforiaExceptionAR);
             }
         }
     }
@@ -475,7 +474,7 @@ public class Session implements UpdateCallbackInterface
         protected void onPostExecute(Boolean result)
         {
             
-            Exception vuforiaException = null;
+            ExceptionAR vuforiaExceptionAR = null;
             
             Log.d(LOGTAG, "LoadTrackerTask.onPostExecute: execution "
                 + (result ? "successful" : "failed"));
@@ -484,8 +483,8 @@ public class Session implements UpdateCallbackInterface
             {
                 String logMessage = "Failed to load tracker data.";
                 Log.e(LOGTAG, logMessage);
-                vuforiaException = new Exception(
-                    Exception.LOADING_TRACKERS_FAILURE,
+                vuforiaExceptionAR = new ExceptionAR(
+                    ExceptionAR.LOADING_TRACKERS_FAILURE,
                     logMessage);
             } else
             {
@@ -494,7 +493,7 @@ public class Session implements UpdateCallbackInterface
                 isStarted = true;
             }
 
-            sessionControl.onInitARDone(vuforiaException);
+            sessionControl.onInitARDone(vuforiaExceptionAR);
         }
     }
 }

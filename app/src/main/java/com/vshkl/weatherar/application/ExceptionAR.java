@@ -8,7 +8,7 @@ and other countries. Trademarks of QUALCOMM Incorporated are used with permissio
 package com.vshkl.weatherar.application;
 
 
-public class Exception extends java.lang.Exception
+public class ExceptionAR extends java.lang.Exception
 {
     
     private static final long serialVersionUID = 2L;
@@ -23,23 +23,23 @@ public class Exception extends java.lang.Exception
     public static final int SET_FOCUS_MODE_FAILURE = 7;
     public static final int ACTIVATE_FLASH_FAILURE = 8;
     
-    private int mCode = -1;
-    private String mString = "";
+    private int code = -1;
+    private String string = "";
 
-    public Exception(int code, String description)
+    public ExceptionAR(int code, String description)
     {
         super(description);
-        mCode = code;
-        mString = description;
+        this.code = code;
+        string = description;
     }
 
     public int getCode()
     {
-        return mCode;
+        return code;
     }
     
     public String getString()
     {
-        return mString;
+        return string;
     }
 }
