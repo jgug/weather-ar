@@ -30,6 +30,7 @@ import com.qualcomm.vuforia.VideoMode;
 import com.qualcomm.vuforia.Vuforia;
 import com.qualcomm.vuforia.Vuforia.UpdateCallbackInterface;
 import com.vshkl.weatherar.R;
+import com.vshkl.weatherar.utils.KeysManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -305,20 +306,6 @@ public class Session implements UpdateCallbackInterface
         projectionMatrix = Tool.getProjectionGL(camCal, 10.0f, 5000.0f);
     }
 
-    private String getLicenseKey() {
-        Resources resources = activity.getResources();
-        InputStream stream = resources.openRawResource(R.raw.license);
-        String licenseKey = "";
-        Properties properties = new Properties();
-        try {
-            properties.load(stream);
-            licenseKey = properties.getProperty("vuforia_license_key");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return licenseKey;
-    }
-
     public void stopCamera() {
         if(isCameraRunning) {
             sessionControl.doStopTrackers();
@@ -398,7 +385,8 @@ public class Session implements UpdateCallbackInterface
         @Override
         protected Boolean doInBackground(Void... params) {
             synchronized (shutdownLock) {
-                Vuforia.setInitParameters(activity, vuforiaFlags, getLicenseKey());
+                Vuforia.setInitParameters(activity, vuforiaFlags,
+                        KeysManager.getKey(activity, "vuforia_license_key"));
                 
                 do {
                     progressValue = Vuforia.init();

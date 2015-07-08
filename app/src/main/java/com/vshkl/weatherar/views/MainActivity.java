@@ -1,14 +1,10 @@
 package com.vshkl.weatherar.views;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -24,22 +20,17 @@ import com.survivingwithandroid.weather.lib.model.Weather;
 import com.survivingwithandroid.weather.lib.provider.openweathermap.OpenweathermapProviderType;
 import com.survivingwithandroid.weather.lib.request.WeatherRequest;
 import com.vshkl.weatherar.R;
+import com.vshkl.weatherar.utils.KeysManager;
 
-import org.androidannotations.annotations.AfterViews;
-import org.androidannotations.annotations.Bean;
-import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ItemClick;
 import org.androidannotations.annotations.TextChange;
 import org.androidannotations.annotations.ViewById;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 @EActivity(R.layout.activity_main)
 public class MainActivity extends AppCompatActivity {
@@ -94,16 +85,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         createWeather();
-        request = new WeatherRequest("2643743");
-        getCurrentConditions();
+        super.onCreate(savedInstanceState);
     }
 
     private void createWeather() {
         builder = new WeatherClient.ClientBuilder();
         config = new WeatherConfig();
-        config.ApiKey = getAPIKey();
+        config.ApiKey = KeysManager.getKey(getApplicationContext(), "openweathermap_api_key");
         config.unitSystem = WeatherConfig.UNIT_SYSTEM.M;
         config.lang = "en";
 
@@ -137,19 +126,5 @@ public class MainActivity extends AppCompatActivity {
                 throwable.printStackTrace();
             }
         });
-    }
-
-    private String getAPIKey() {
-        Resources resources = this.getResources();
-        InputStream stream = resources.openRawResource(R.raw.license);
-        String licenseKey = "";
-        Properties properties = new Properties();
-        try {
-            properties.load(stream);
-            licenseKey = properties.getProperty("openweather_api_key");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return licenseKey;
     }
 }
