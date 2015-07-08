@@ -22,9 +22,15 @@ def AAVersion = '3.3.1'
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:22.2.0'
+    /* Vuforia library */
     compile files('src/main/Vuforia.jar')
+    /* Android annotations */
     apt "org.androidannotations:androidannotations:$AAVersion"
     compile "org.androidannotations:androidannotations-api:$AAVersion"
+    /* Weatherlib */
+    compile 'com.survivingwithandroid:weatherlib:1.5.8'
+    compile 'com.survivingwithandroid:weatherlib_volleyclient:1.5.8'
+    compile 'com.mcxiaoke.volley:library:1.0.6@aar'
 }
 
 apt {
