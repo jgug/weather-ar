@@ -29,6 +29,8 @@ import org.androidannotations.annotations.TextChange;
 import org.androidannotations.annotations.ViewById;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,10 +153,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onWeatherRetrieved(WeatherForecast weatherForecast) {
                 List<DayForecast> weather = weatherForecast.getForecast();
+                Calendar calendar = Calendar.getInstance();
                 stringBuilder.append("Forecast:\n");
                 for (DayForecast day : weather) {
-                    stringBuilder.append(day.getStringDate())
-                            .append( (int) day.forecastTemp.min)
+                    calendar.setTimeInMillis(day.timestamp * 1000l);
+                    stringBuilder.append(calendar.get(Calendar.DAY_OF_MONTH))
+                            .append(".")
+                            .append(calendar.get(Calendar.MONTH))
+                            .append(" ")
+                            .append((int) day.forecastTemp.min)
                             .append(" / ")
                             .append( (int) day.forecastTemp.max)
                             .append(" °C")
