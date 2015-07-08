@@ -3,7 +3,6 @@ package com.vshkl.weatherar.views;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -16,7 +15,9 @@ import com.survivingwithandroid.weather.lib.exception.WeatherLibException;
 import com.survivingwithandroid.weather.lib.exception.WeatherProviderInstantiationException;
 import com.survivingwithandroid.weather.lib.model.City;
 import com.survivingwithandroid.weather.lib.model.CurrentWeather;
+import com.survivingwithandroid.weather.lib.model.DayForecast;
 import com.survivingwithandroid.weather.lib.model.Weather;
+import com.survivingwithandroid.weather.lib.model.WeatherForecast;
 import com.survivingwithandroid.weather.lib.provider.openweathermap.OpenweathermapProviderType;
 import com.survivingwithandroid.weather.lib.request.WeatherRequest;
 import com.vshkl.weatherar.R;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                     citiesMap.put(c.toString(), c.getId());
                     cities.add(c.toString());
                 }
-                listAdapter= new ArrayAdapter<>(getApplicationContext(),
+                listAdapter = new ArrayAdapter<>(getApplicationContext(),
                         android.R.layout.simple_list_item_1, cities);
                 citiesList.setAdapter(listAdapter);
             }
@@ -74,11 +75,8 @@ public class MainActivity extends AppCompatActivity {
 
     @ItemClick
     void citiesItemClicked(String city) {
-        Toast.makeText(
-                getApplicationContext(),
-                citiesMap.get(city),
-                Toast.LENGTH_SHORT
-        ).show();
+        request = new WeatherRequest(citiesMap.get(city));
+        getWeather();
         startActivity(new Intent(this, CameraActivity_.class));
 
     }
@@ -108,12 +106,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void getCurrentConditions() {
+    private void getWeather() {
+        final StringBuilder stringBuilder = new StringBuilder();
+
         client.getCurrentCondition(request, new WeatherClient.WeatherEventListener() {
             @Override
             public void onWeatherRetrieved(CurrentWeather currentWeather) {
                 Weather weather = currentWeather.weather;
-                Log.v("TEMP", String.valueOf(weather.temperature.getTemp()));
+                stringBuilder.append("Location: ")
+                        .append(weather.location.getCity())
+                        .append(", ")
+                        .append(weather.location.getCountry())
+                        .append('\n')
+                        .append('\n')
+                        .append("Current: ")
+                        .append(weather.currentCondition.getCondition())
+                        .append('\n')
+                        .append("Temperature: ")
+                        .append( (int) weather.temperature.getTemp())
+                        .append("°C")
+                        .append('\n')
+                        .append("Wind: ")
+                        .append( (int) weather.wind.getSpeed())
+                        .append("m/s")
+                        .append(", ")
+                        .append( (int) weather.wind.getDeg())
+                        .append("°")
+                        .append('\n')
+                        .append('\n');
             }
 
             @Override
@@ -124,6 +144,33 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onConnectionError(Throwable throwable) {
                 throwable.printStackTrace();
+            }
+        });
+
+        client.getForecastWeather(request, new WeatherClient.ForecastWeatherEventListener() {
+            @Override
+            public void onWeatherRetrieved(WeatherForecast weatherForecast) {
+                List<DayForecast> weather = weatherForecast.getForecast();
+                stringBuilder.append("Forecast:\n");
+                for (DayForecast day : weather) {
+                    stringBuilder.append(day.getStringDate())
+                            .append( (int) day.forecastTemp.min)
+                            .append(" / ")
+                            .append( (int) day.forecastTemp.max)
+                            .append(" °C")
+                            .append('\n');
+                }
+                Toast.makeText(getApplicationContext(),stringBuilder.toString(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onWeatherError(WeatherLibException e) {
+
+            }
+
+            @Override
+            public void onConnectionError(Throwable throwable) {
+
             }
         });
     }
