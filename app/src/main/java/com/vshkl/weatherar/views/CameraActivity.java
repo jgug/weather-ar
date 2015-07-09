@@ -10,12 +10,14 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextPaint;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 import android.widget.RelativeLayout;
 
 import com.qualcomm.vuforia.CameraDevice;
@@ -35,6 +37,8 @@ import com.vshkl.weatherar.utils.ApplicationGLView;
 import com.vshkl.weatherar.utils.Texture;
 
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.Fullscreen;
+import org.androidannotations.annotations.WindowFeature;
 
 import java.util.Vector;
 
@@ -42,6 +46,9 @@ import java.util.Vector;
 public class CameraActivity extends AppCompatActivity implements Control {
 
     private static final String LOGTAG = "CameraActivity";
+
+    private static final int LENGTH = 1024;
+    private static final int HEIGHT = 1024;
 
     private Session session;
     private ApplicationGLView applicationGLView;
@@ -70,7 +77,7 @@ public class CameraActivity extends AppCompatActivity implements Control {
         super.onCreate(savedInstanceState);
 
         Bundle bundle = this.getIntent().getExtras();
-        String weatherStr = bundle.getString("WeatherStr");
+        String weatherStr = bundle.getString("Forecast");
         Log.v("WEATHER IN CAMERA", weatherStr);
 
         session = new Session(this);
@@ -83,8 +90,7 @@ public class CameraActivity extends AppCompatActivity implements Control {
     }
 
     private void loadTextures(String text) {
-//        textures.add(Texture.loadTextureFromApk("Trooper.png", getAssets()));
-        Bitmap bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = Bitmap.createBitmap(LENGTH, HEIGHT, Bitmap.Config.ARGB_8888);
         textures.add(Texture.loadTextureFromBitmap(createBitmapText(bitmap, text)));
         bitmap.recycle();
     }
@@ -267,7 +273,6 @@ public class CameraActivity extends AppCompatActivity implements Control {
 
         return false;
     }
-
 
     void startBuild() {
         TrackerManager trackerManager = TrackerManager.getInstance();
@@ -477,15 +482,21 @@ public class CameraActivity extends AppCompatActivity implements Control {
         bitmap.eraseColor(0);
 
         Drawable background = new ColorDrawable(Color.TRANSPARENT);
-        background.setBounds(0, 0, 512, 512);
+        background.setBounds(0, 0, LENGTH, HEIGHT);
         background.draw(canvas);
 
-        Paint textPaint = new Paint();
-        textPaint.setTextSize(64);
+        TextPaint textPaint = new TextPaint();
+        textPaint.setTextSize(72);
         textPaint.setAntiAlias(true);
+        textPaint.setHinting(Paint.HINTING_ON);
         textPaint.setARGB(0xff, 0xff, 0xff, 0xff);
 
-        canvas.drawText(text, 16, 112, textPaint);
+        int x = 16;
+        int y = 112;
+        for (String line : text.split("\n")) {
+            canvas.drawText(line, x, y, textPaint);
+            y += textPaint.descent() - textPaint.ascent();
+        }
 
         return bitmap;
     }

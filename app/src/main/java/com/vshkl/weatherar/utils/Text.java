@@ -20,14 +20,14 @@ public class Text extends MeshObject {
     }
 
     private void setVerts() {
-//        double[] PLANE_VERTICES = {-1.0, -1.0, 0.0,
-//                                    1.0, -1.0, 0.0,
-//                                    1.0,  1.0, 0.0,
-//                                   -1.0,  1.0, 0.0};
-        double[] PLANE_VERTICES = {-1.0,  1.0, 0.0,
-                                    1.0,  1.0, 0.0,
+        double[] PLANE_VERTICES = {-1.0, -1.0, 0.0,
                                     1.0, -1.0, 0.0,
-                                   -1.0, -1.0, 0.0};
+                                    1.0,  1.0, 0.0,
+                                   -1.0,  1.0, 0.0};
+//        double[] PLANE_VERTICES = {-1.0,  1.0, 0.0,
+//                                    1.0,  1.0, 0.0,
+//                                    1.0, -1.0, 0.0,
+//                                   -1.0, -1.0, 0.0};
 //        double[] PLANE_VERTICES = {1.0, 1.0, 0.0,
 //                                -1.0, 1.0, 0.0,
 //                                -1.0, -1.0, 0.0,

@@ -27,15 +27,19 @@ import org.androidannotations.annotations.ItemClick;
 import org.androidannotations.annotations.TextChange;
 import org.androidannotations.annotations.ViewById;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
 @EActivity(R.layout.activity_main)
 public class MainActivity extends AppCompatActivity {
+
+    private static final int DAY_OF_FORECAST = 7;
 
     private WeatherClient client;
     private WeatherRequest request;
@@ -83,22 +87,36 @@ public class MainActivity extends AppCompatActivity {
                 List<DayForecast> weather = weatherForecast.getForecast();
                 Calendar calendar = Calendar.getInstance();
                 StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("Forecast:\n");
+                DecimalFormat formatter = new DecimalFormat("00");
+                stringBuilder
+                        .append(DAY_OF_FORECAST)
+                        .append(" day ")
+                        .append("forecast ")
+                        .append("for ")
+                        .append(weather.get(0).weather.location.getCity())
+                        .append(", ")
+                        .append(weather.get(0).weather.location.getCountry())
+                        .append("\n\n");
                 for (DayForecast day : weather) {
                     calendar.setTimeInMillis(day.timestamp * 1000l);
-                    stringBuilder.append(calendar.get(Calendar.DAY_OF_MONTH))
-                            .append(".")
-                            .append(calendar.get(Calendar.MONTH))
+                    stringBuilder
+                            .append(formatter.format(calendar.get(Calendar.DAY_OF_MONTH)))
                             .append(" ")
+                            .append(calendar.getDisplayName(
+                                    Calendar.MONTH, Calendar.SHORT, Locale.getDefault()))
+                            .append("  ")
                             .append((int) day.forecastTemp.min)
-                            .append(" / ")
+                            .append("°/")
                             .append((int) day.forecastTemp.max)
-                            .append(" °C")
+                            .append("°")
+                            .append("  ")
+                            .append((int) day.weather.wind.getSpeed())
+                            .append(" m/s")
                             .append('\n');
                 }
                 Log.v("FORECAST", stringBuilder.toString());
                 Intent intent = new Intent(getApplicationContext(), CameraActivity_.class);
-                intent.putExtra("WeatherStr", stringBuilder.toString());
+                intent.putExtra("Forecast", stringBuilder.toString());
                 startActivity(intent);
             }
 
@@ -121,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
         WeatherConfig config = new WeatherConfig();
         config.ApiKey = KeysManager.getKey(context, "openweathermap_api_key");
         config.unitSystem = WeatherConfig.UNIT_SYSTEM.M;
-        config.numDays = 7;
+        config.numDays = DAY_OF_FORECAST;
         config.lang = "en";
 
         try {
