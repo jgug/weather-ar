@@ -1,12 +1,12 @@
 package com.vshkl.weatherar.views;
 
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -69,17 +69,24 @@ public class CameraActivity extends AppCompatActivity implements Control {
         Log.d(LOGTAG, "onCreate");
         super.onCreate(savedInstanceState);
 
+        Bundle bundle = this.getIntent().getExtras();
+        String weatherStr = bundle.getString("WeatherStr");
+        Log.v("WEATHER IN CAMERA", weatherStr);
+
         session = new Session(this);
         session.initAR(this, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         textures = new Vector<>();
-        loadTextures();
+        loadTextures(weatherStr);
 
         isDroidDevice = android.os.Build.MODEL.toLowerCase().startsWith("droid");
     }
 
-    private void loadTextures() {
-        textures.add(Texture.loadTextureFromApk("Trooper.png", getAssets()));
+    private void loadTextures(String text) {
+//        textures.add(Texture.loadTextureFromApk("Trooper.png", getAssets()));
+        Bitmap bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
+        textures.add(Texture.loadTextureFromBitmap(createBitmapText(bitmap, text)));
+        bitmap.recycle();
     }
 
     @Override
@@ -463,5 +470,23 @@ public class CameraActivity extends AppCompatActivity implements Control {
                 trackable.startExtendedTracking();
             }
         }
+    }
+
+    public Bitmap createBitmapText(Bitmap bitmap, String text) {
+        Canvas canvas = new Canvas(bitmap);
+        bitmap.eraseColor(0);
+
+        Drawable background = new ColorDrawable(Color.TRANSPARENT);
+        background.setBounds(0, 0, 512, 512);
+        background.draw(canvas);
+
+        Paint textPaint = new Paint();
+        textPaint.setTextSize(64);
+        textPaint.setAntiAlias(true);
+        textPaint.setARGB(0xff, 0xff, 0xff, 0xff);
+
+        canvas.drawText(text, 16, 112, textPaint);
+
+        return bitmap;
     }
 }

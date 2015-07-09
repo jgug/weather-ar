@@ -1,22 +1,21 @@
 package com.vshkl.weatherar.views;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.survivingwithandroid.weather.lib.WeatherClient;
 import com.survivingwithandroid.weather.lib.WeatherConfig;
 import com.survivingwithandroid.weather.lib.exception.WeatherLibException;
 import com.survivingwithandroid.weather.lib.exception.WeatherProviderInstantiationException;
 import com.survivingwithandroid.weather.lib.model.City;
-import com.survivingwithandroid.weather.lib.model.CurrentWeather;
 import com.survivingwithandroid.weather.lib.model.DayForecast;
-import com.survivingwithandroid.weather.lib.model.Weather;
 import com.survivingwithandroid.weather.lib.model.WeatherForecast;
 import com.survivingwithandroid.weather.lib.provider.openweathermap.OpenweathermapProviderType;
 import com.survivingwithandroid.weather.lib.request.WeatherRequest;
@@ -30,21 +29,21 @@ import org.androidannotations.annotations.ViewById;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @EActivity(R.layout.activity_main)
 public class MainActivity extends AppCompatActivity {
 
-    private WeatherClient.ClientBuilder builder;
-    private WeatherConfig config;
     private WeatherClient client;
     private WeatherRequest request;
 
     private ListAdapter listAdapter;
     private Map<String, String> citiesMap = new HashMap<>();
+
+    private Objects lock;
 
     @ViewById(R.id.cities)
     ListView citiesList;
@@ -78,82 +77,12 @@ public class MainActivity extends AppCompatActivity {
     @ItemClick
     void citiesItemClicked(String city) {
         request = new WeatherRequest(citiesMap.get(city));
-        getWeather();
-        startActivity(new Intent(this, CameraActivity_.class));
-
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        createWeather();
-        super.onCreate(savedInstanceState);
-    }
-
-    private void createWeather() {
-        builder = new WeatherClient.ClientBuilder();
-        config = new WeatherConfig();
-        config.ApiKey = KeysManager.getKey(getApplicationContext(), "openweathermap_api_key");
-        config.unitSystem = WeatherConfig.UNIT_SYSTEM.M;
-        config.lang = "en";
-
-        try {
-            client = builder.attach(this)
-                    .provider(new OpenweathermapProviderType())
-                    .httpClient(com.survivingwithandroid.weather.lib.client.volley
-                            .WeatherClientDefault.class)
-                    .config(config)
-                    .build();
-        } catch (WeatherProviderInstantiationException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void getWeather() {
-        final StringBuilder stringBuilder = new StringBuilder();
-
-        client.getCurrentCondition(request, new WeatherClient.WeatherEventListener() {
-            @Override
-            public void onWeatherRetrieved(CurrentWeather currentWeather) {
-                Weather weather = currentWeather.weather;
-                stringBuilder.append("Location: ")
-                        .append(weather.location.getCity())
-                        .append(", ")
-                        .append(weather.location.getCountry())
-                        .append('\n')
-                        .append('\n')
-                        .append("Current: ")
-                        .append(weather.currentCondition.getCondition())
-                        .append('\n')
-                        .append("Temperature: ")
-                        .append( (int) weather.temperature.getTemp())
-                        .append("°C")
-                        .append('\n')
-                        .append("Wind: ")
-                        .append( (int) weather.wind.getSpeed())
-                        .append("m/s")
-                        .append(", ")
-                        .append( (int) weather.wind.getDeg())
-                        .append("°")
-                        .append('\n')
-                        .append('\n');
-            }
-
-            @Override
-            public void onWeatherError(WeatherLibException e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onConnectionError(Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        });
-
         client.getForecastWeather(request, new WeatherClient.ForecastWeatherEventListener() {
             @Override
             public void onWeatherRetrieved(WeatherForecast weatherForecast) {
                 List<DayForecast> weather = weatherForecast.getForecast();
                 Calendar calendar = Calendar.getInstance();
+                StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append("Forecast:\n");
                 for (DayForecast day : weather) {
                     calendar.setTimeInMillis(day.timestamp * 1000l);
@@ -163,22 +92,47 @@ public class MainActivity extends AppCompatActivity {
                             .append(" ")
                             .append((int) day.forecastTemp.min)
                             .append(" / ")
-                            .append( (int) day.forecastTemp.max)
+                            .append((int) day.forecastTemp.max)
                             .append(" °C")
                             .append('\n');
                 }
-                Toast.makeText(getApplicationContext(),stringBuilder.toString(), Toast.LENGTH_LONG).show();
+                Log.v("FORECAST", stringBuilder.toString());
+                Intent intent = new Intent(getApplicationContext(), CameraActivity_.class);
+                intent.putExtra("WeatherStr", stringBuilder.toString());
+                startActivity(intent);
             }
 
             @Override
-            public void onWeatherError(WeatherLibException e) {
-
-            }
+            public void onWeatherError(WeatherLibException e) {}
 
             @Override
-            public void onConnectionError(Throwable throwable) {
-
-            }
+            public void onConnectionError(Throwable throwable) {}
         });
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        createWeather(this);
+        super.onCreate(savedInstanceState);
+    }
+
+    public void createWeather(Context context) {
+        WeatherClient.ClientBuilder builder = new WeatherClient.ClientBuilder();
+        WeatherConfig config = new WeatherConfig();
+        config.ApiKey = KeysManager.getKey(context, "openweathermap_api_key");
+        config.unitSystem = WeatherConfig.UNIT_SYSTEM.M;
+        config.numDays = 7;
+        config.lang = "en";
+
+        try {
+            client = builder.attach(context)
+                    .provider(new OpenweathermapProviderType())
+                    .httpClient(com.survivingwithandroid.weather.lib.client.volley
+                            .WeatherClientDefault.class)
+                    .config(config)
+                    .build();
+        } catch (WeatherProviderInstantiationException e) {
+            e.printStackTrace();
+        }
     }
 }

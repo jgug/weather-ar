@@ -33,24 +33,27 @@ public class Texture {
         try {
             inputStream = assets.open(fileName, AssetManager.ACCESS_BUFFER);
             
-            BufferedInputStream bufferedStream = new BufferedInputStream(
-                inputStream);
-            Bitmap bitMap = BitmapFactory.decodeStream(bufferedStream);
+            BufferedInputStream bufferedStream = new BufferedInputStream(inputStream);
+            Bitmap bM = BitmapFactory.decodeStream(bufferedStream);
             
-            int[] data = new int[bitMap.getWidth() * bitMap.getHeight()];
-            bitMap.getPixels(data, 0, bitMap.getWidth(), 0, 0,
-                bitMap.getWidth(), bitMap.getHeight());
+            int[] data = new int[bM.getWidth() * bM.getHeight()];
+            bM.getPixels(data, 0, bM.getWidth(), 0, 0, bM.getWidth(), bM.getHeight());
             
-            return loadTextureFromIntBuffer(data, bitMap.getWidth(),
-                bitMap.getHeight());
+            return loadTextureFromIntBuffer(data, bM.getWidth(), bM.getHeight());
         } catch (IOException e) {
             Log.e(LOGTAG, "Failed to log texture '" + fileName + "' from APK");
             Log.i(LOGTAG, e.getMessage());
             return null;
         }
     }
-    
-    
+
+    public static Texture loadTextureFromBitmap(Bitmap bitmap) {
+        int[] data = new int[bitmap.getWidth() * bitmap.getHeight()];
+        bitmap.getPixels(data, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        return loadTextureFromIntBuffer(data, bitmap.getWidth(), bitmap.getHeight());
+    }
+
     public static Texture loadTextureFromIntBuffer(int[] data, int width, int height) {
         int numPixels = width * height;
         byte[] dataBytes = new byte[numPixels * 4];

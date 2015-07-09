@@ -3,7 +3,9 @@ package com.vshkl.weatherar.render;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -92,6 +94,11 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         Renderer.getInstance().drawVideoBackground();
 
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+
+        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
         GLES20.glEnable(GLES20.GL_CULL_FACE);
         if (Renderer.getInstance().getVideoBackgroundConfig().getReflection()
                 == VIDEO_BACKGROUND_REFLECTION.VIDEO_BACKGROUND_REFLECTION_ON) {
@@ -111,7 +118,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             Matrix.translateM(modelViewMatrix, 0, 0.0f, 0.0f, scale);
             Matrix.scaleM(modelViewMatrix, 0, scale, scale, scale);
             //TODO: Replace 90 degree rotation with right verticeses
-            Matrix.rotateM(modelViewMatrix,0, 90, 0.0f, 0.0f, scale);
+            Matrix.rotateM(modelViewMatrix, 0, 90, 0.0f, 0.0f, scale);
             Matrix.multiplyMM(modelViewProjection, 0, Session
                     .getProjectionMatrix().getData(), 0, modelViewMatrix, 0);
 
@@ -129,6 +136,11 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             GLES20.glEnableVertexAttribArray(textureCoordHandle);
 
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+
+//            Bitmap bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
+//            GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, createBitmapText(bitmap, "Hello!"), 0);
+//            bitmap.recycle();
+
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures.get(0).mTextureID[0]);
             GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0);
             GLES20.glUniform1i(texSampler2DHandle, 0);
@@ -140,13 +152,10 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             GLES20.glDisableVertexAttribArray(normalHandle);
             GLES20.glDisableVertexAttribArray(textureCoordHandle);
 
-            Bitmap bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
-            GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, createBitmapText(activity, bitmap, "Hello!"), 0);
-            bitmap.recycle();
-
             Utils.checkGLError("CameraActivity renderFrame");
         }
 
+        GLES20.glDisable(GLES20.GL_BLEND);
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 
         Renderer.getInstance().end();
@@ -160,13 +169,24 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
 
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, Vuforia.requiresAlpha() ? 0.0f : 1.0f);
 
+//        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+//        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+//        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+//        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+
         for (Texture t : textures) {
             GLES20.glGenTextures(1, t.mTextureID, 0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, t.mTextureID[0]);
+            // You search for this part
             GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
                     GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
             GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
                     GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+//            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+//                    GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+//            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+//                    GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+            //
             GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA,
                     t.mWidth, t.mHeight, 0, GLES20.GL_RGBA,
                     GLES20.GL_UNSIGNED_BYTE, t.mData);
@@ -193,12 +213,11 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         this.textures = textures;
     }
 
-    public Bitmap createBitmapText(Context context, Bitmap bitmap, String text) {
+    public Bitmap createBitmapText(Bitmap bitmap, String text) {
         Canvas canvas = new Canvas(bitmap);
         bitmap.eraseColor(0);
 
-        Drawable background = context.getResources().getDrawable(R.color.transparent);
-        background.setAlpha(0);
+        Drawable background = new ColorDrawable(Color.TRANSPARENT);
         background.setBounds(0, 0, 512, 512);
         background.draw(canvas);
 
