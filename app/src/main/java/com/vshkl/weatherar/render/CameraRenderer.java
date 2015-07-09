@@ -95,41 +95,36 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
 
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 
-        GLES20.glEnable(GLES20.GL_BLEND);
-        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+//        GLES20.glEnable(GLES20.GL_BLEND);
+//        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+//        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
         GLES20.glEnable(GLES20.GL_CULL_FACE);
-        if (Renderer.getInstance().getVideoBackgroundConfig().getReflection()
-                == VIDEO_BACKGROUND_REFLECTION.VIDEO_BACKGROUND_REFLECTION_ON) {
-            GLES20.glFrontFace(GLES20.GL_CW);
-        } else {
-            GLES20.glFrontFace(GLES20.GL_CCW);
-        }
 
         activity.refFreeFrame.render();
 
         for (int tIdx = 0; tIdx < state.getNumTrackableResults(); tIdx++) {
             TrackableResult trackableResult = state.getTrackableResult(tIdx);
-            Matrix44F modelViewMatrix_Vuforia = Tool.convertPose2GLMatrix(trackableResult.getPose());
-            float[] modelViewMatrix = modelViewMatrix_Vuforia.getData();
 
+            Matrix44F modelViewMatrix_Vuforia = Tool.convertPose2GLMatrix(trackableResult.getPose());
+
+            float[] modelViewMatrix = modelViewMatrix_Vuforia.getData();
             float[] modelViewProjection = new float[16];
+
             Matrix.translateM(modelViewMatrix, 0, 0.0f, 0.0f, scale);
             Matrix.scaleM(modelViewMatrix, 0, scale, scale, scale);
-            //TODO: Replace 90 degree rotation with right verticeses
             Matrix.rotateM(modelViewMatrix, 0, 90, 0.0f, 0.0f, scale);
-            Matrix.multiplyMM(modelViewProjection, 0, Session
-                    .getProjectionMatrix().getData(), 0, modelViewMatrix, 0);
+            Matrix.multiplyMM(modelViewProjection, 0, Session.getProjectionMatrix().getData(), 0, modelViewMatrix, 0);
 
+            GLES20.glEnable(GLES20.GL_BLEND);
+            GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
             GLES20.glUseProgram(shaderProgramID);
+//            GLES20.glDisable(GLES20.GL_BLEND);
 
-            GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
-                    false, 0, text.getVertices());
-            GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
-                    false, 0, text.getNormals());
-            GLES20.glVertexAttribPointer(textureCoordHandle, 2,
-                    GLES20.GL_FLOAT, false, 0, text.getTexCoords());
+            // Prepare for rendering the frame
+            GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT, false, 0, text.getVertices());
+            GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT, false, 0, text.getNormals());
+            GLES20.glVertexAttribPointer(textureCoordHandle, 2, GLES20.GL_FLOAT, false, 0, text.getTexCoords());
 
             GLES20.glEnableVertexAttribArray(vertexHandle);
             GLES20.glEnableVertexAttribArray(normalHandle);
@@ -137,25 +132,24 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
 
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
-//            Bitmap bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
-//            GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, createBitmapText(bitmap, "Hello!"), 0);
-//            bitmap.recycle();
-
+            // The first loaded texture is the keyframe
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures.get(0).mTextureID[0]);
             GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0);
             GLES20.glUniform1i(texSampler2DHandle, 0);
-            GLES20.glDrawElements(GLES20.GL_TRIANGLES,
-                    text.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
-                    text.getIndices());
+
+            // Render
+            GLES20.glDrawElements(GLES20.GL_TRIANGLES, text.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT, text.getIndices());
 
             GLES20.glDisableVertexAttribArray(vertexHandle);
             GLES20.glDisableVertexAttribArray(normalHandle);
             GLES20.glDisableVertexAttribArray(textureCoordHandle);
 
+            GLES20.glUseProgram(0);
+            GLES20.glDisable(GLES20.GL_BLEND);
+
             Utils.checkGLError("CameraActivity renderFrame");
         }
 
-        GLES20.glDisable(GLES20.GL_BLEND);
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 
         Renderer.getInstance().end();
@@ -167,45 +161,27 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
 
         text = new Text();
 
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, Vuforia.requiresAlpha() ? 0.0f : 1.0f);
+//        GLES20.glClearColor(0.0f, 0.0f, 0.0f, Vuforia.requiresAlpha() ? 0.0f : 1.0f);
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-//        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-//        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-//        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-//        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
 
         for (Texture t : textures) {
             GLES20.glGenTextures(1, t.mTextureID, 0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, t.mTextureID[0]);
-            // You search for this part
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-                    GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-                    GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-//            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-//                    GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-//            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-//                    GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-            //
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA,
-                    t.mWidth, t.mHeight, 0, GLES20.GL_RGBA,
-                    GLES20.GL_UNSIGNED_BYTE, t.mData);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, t.mWidth, t.mHeight, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, t.mData);
         }
 
-        shaderProgramID = Utils.createProgramFromShaderSrc(
-                FrameShaders.KEY_FRAME_VERTEX_SHADER,
-                FrameShaders.KEY_FRAME_FRAGMENT_SHADER);
+        shaderProgramID = Utils.createProgramFromShaderSrc(FrameShaders.FRAME_VERTEX_SHADER, FrameShaders.FRAME_FRAGMENT_SHADER);
 
-        vertexHandle = GLES20.glGetAttribLocation(shaderProgramID,
-                "vertexPosition");
-        normalHandle = GLES20.glGetAttribLocation(shaderProgramID,
-                "vertexNormal");
-        textureCoordHandle = GLES20.glGetAttribLocation(shaderProgramID,
-                "vertexTexCoord");
-        mvpMatrixHandle = GLES20.glGetUniformLocation(shaderProgramID,
-                "modelViewProjectionMatrix");
-        texSampler2DHandle = GLES20.glGetUniformLocation(shaderProgramID,
-                "texSampler2D");
+        vertexHandle = GLES20.glGetAttribLocation(shaderProgramID, "vertexPosition");
+        normalHandle = GLES20.glGetAttribLocation(shaderProgramID, "vertexNormal");
+        textureCoordHandle = GLES20.glGetAttribLocation(shaderProgramID, "vertexTexCoord");
+        mvpMatrixHandle = GLES20.glGetUniformLocation(shaderProgramID, "modelViewProjectionMatrix");
+        texSampler2DHandle = GLES20.glGetUniformLocation(shaderProgramID, "texSampler2D");
     }
 
     public void setTextures(Vector<Texture> textures) {

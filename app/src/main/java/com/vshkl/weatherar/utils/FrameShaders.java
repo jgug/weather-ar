@@ -2,7 +2,7 @@ package com.vshkl.weatherar.utils;
 
 public class FrameShaders {
 
-    public static final String KEY_FRAME_VERTEX_SHADER = " \n"
+    public static final String FRAME_VERTEX_SHADER = " \n"
             + "attribute vec4 vertexPosition; \n"
             + "attribute vec4 vertexNormal; \n"
             + "attribute vec2 vertexTexCoord; \n"
@@ -17,7 +17,7 @@ public class FrameShaders {
             + "   texCoord = vertexTexCoord; \n"
             + "} \n";
 
-    public static final String KEY_FRAME_FRAGMENT_SHADER = " \n"
+    public static final String FRAME_FRAGMENT_SHADER = " \n"
             + "\n"
             + "precision mediump float; \n"
             + "varying vec2 texCoord; \n"
@@ -25,7 +25,19 @@ public class FrameShaders {
             + " \n"
             + "void main() \n"
             + "{ \n"
-            + "   gl_FragColor = texture2D(texSampler2D, texCoord); \n"
+            + "   gl_FragColor = texture2D(texSampler2D, texCoord).aaaa; \n"
             + "} \n";
+
+//        public static final String FRAME_FRAGMENT_SHADER = " \n"
+//                + "\n"
+//                + "precision mediump float; \n"
+//                + "varying vec2 texCoord; \n"
+//                + "uniform sampler2D texSampler2D; \n"
+//                + " \n"
+//                + "void main() \n"
+//                + "{ \n"
+//                + "   vec4 tex = texture2D(texSampler2D, texCoord); \n"
+//                + "   gl_FragColor = vec4(tex.r, tex.g, tex.b, tex.a); \n"
+//                + "} \n";
 
 }

@@ -37,8 +37,6 @@ import com.vshkl.weatherar.utils.ApplicationGLView;
 import com.vshkl.weatherar.utils.Texture;
 
 import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.Fullscreen;
-import org.androidannotations.annotations.WindowFeature;
 
 import java.util.Vector;
 
@@ -253,7 +251,6 @@ public class CameraActivity extends AppCompatActivity implements Control {
 
         return true;
     }
-
 
     boolean isUserDefinedTargetsRunning() {
         TrackerManager trackerManager = TrackerManager.getInstance();
