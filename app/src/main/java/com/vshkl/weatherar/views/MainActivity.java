@@ -22,6 +22,7 @@ import com.survivingwithandroid.weather.lib.request.WeatherRequest;
 import com.vshkl.weatherar.R;
 import com.vshkl.weatherar.utils.KeysManager;
 
+import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ItemClick;
 import org.androidannotations.annotations.TextChange;
@@ -40,14 +41,12 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
 
     private static final int DAY_OF_FORECAST = 7;
+    private static final String LANG = "en";
 
     private WeatherClient client;
-    private WeatherRequest request;
 
     private ListAdapter listAdapter;
     private Map<String, String> citiesMap = new HashMap<>();
-
-    private Objects lock;
 
     @ViewById(R.id.cities)
     ListView citiesList;
@@ -80,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
     @ItemClick
     void citiesItemClicked(String city) {
-        request = new WeatherRequest(citiesMap.get(city));
+        WeatherRequest request = new WeatherRequest(citiesMap.get(city));
         client.getForecastWeather(request, new WeatherClient.ForecastWeatherEventListener() {
             @Override
             public void onWeatherRetrieved(WeatherForecast weatherForecast) {
@@ -121,29 +120,34 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onWeatherError(WeatherLibException e) {}
+            public void onWeatherError(WeatherLibException e) {
+            }
 
             @Override
-            public void onConnectionError(Throwable throwable) {}
+            public void onConnectionError(Throwable throwable) {
+            }
         });
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        createWeather(this);
         super.onCreate(savedInstanceState);
+        if (savedInstanceState == null) {
+            createWeather();
+        }
     }
 
-    public void createWeather(Context context) {
+    @Background
+    public void createWeather() {
         WeatherClient.ClientBuilder builder = new WeatherClient.ClientBuilder();
         WeatherConfig config = new WeatherConfig();
-        config.ApiKey = KeysManager.getKey(context, "openweathermap_api_key");
+        config.ApiKey = KeysManager.getKey(this, "openweathermap_api_key");
         config.unitSystem = WeatherConfig.UNIT_SYSTEM.M;
         config.numDays = DAY_OF_FORECAST;
-        config.lang = "en";
+        config.lang = LANG;
 
         try {
-            client = builder.attach(context)
+            client = builder.attach(this)
                     .provider(new OpenweathermapProviderType())
                     .httpClient(com.survivingwithandroid.weather.lib.client.volley
                             .WeatherClientDefault.class)

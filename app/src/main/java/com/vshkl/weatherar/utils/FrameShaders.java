@@ -27,17 +27,4 @@ public class FrameShaders {
             + "{ \n"
             + "   gl_FragColor = texture2D(texSampler2D, texCoord).aaaa; \n"
             + "} \n";
-
-//        public static final String FRAME_FRAGMENT_SHADER = " \n"
-//                + "\n"
-//                + "precision mediump float; \n"
-//                + "varying vec2 texCoord; \n"
-//                + "uniform sampler2D texSampler2D; \n"
-//                + " \n"
-//                + "void main() \n"
-//                + "{ \n"
-//                + "   vec4 tex = texture2D(texSampler2D, texCoord); \n"
-//                + "   gl_FragColor = vec4(tex.r, tex.g, tex.b, tex.a); \n"
-//                + "} \n";
-
 }

@@ -9,8 +9,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * Class for managing license keys
+ * Keys stores in /res/raw/license.properties file and dont track with git
+ */
 public class KeysManager {
 
+    /**
+     * Method retrieves license key by name from license.properties file
+     *
+     * @param context is an application context
+     * @param name is a license key name
+     * @return license key as {@link String}
+     */
     public static String getKey(Context context, String name) {
         Resources resources = context.getResources();
         InputStream stream = resources.openRawResource(R.raw.license);

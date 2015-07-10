@@ -10,8 +10,7 @@ package com.vshkl.weatherar.application;
 import com.qualcomm.vuforia.State;
 
 
-public interface Control
-{
+public interface Control {
     
     boolean doInitTrackers();
     

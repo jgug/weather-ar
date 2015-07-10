@@ -24,14 +24,6 @@ public class Text extends MeshObject {
                                     1.0, -1.0, 0.0,
                                     1.0,  1.0, 0.0,
                                    -1.0,  1.0, 0.0};
-//        double[] PLANE_VERTICES = {-1.0,  1.0, 0.0,
-//                                    1.0,  1.0, 0.0,
-//                                    1.0, -1.0, 0.0,
-//                                   -1.0, -1.0, 0.0};
-//        double[] PLANE_VERTICES = {1.0, 1.0, 0.0,
-//                                -1.0, 1.0, 0.0,
-//                                -1.0, -1.0, 0.0,
-//                                1.0, -1.0, 0.0};
         vertBuff = fillBuffer(PLANE_VERTICES);
         verticesNumber = PLANE_VERTICES.length / 3;
     }
@@ -55,7 +47,6 @@ public class Text extends MeshObject {
     public int getNumObjectIndex() {
         return indicesNumber;
     }
-
 
     @Override
     public int getNumObjectVertex() {

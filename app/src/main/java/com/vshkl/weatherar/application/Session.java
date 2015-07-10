@@ -37,8 +37,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 
-public class Session implements UpdateCallbackInterface
-{
+public class Session implements UpdateCallbackInterface {
     //========== Variables ========================================================================
 
     private static final String LOGTAG = "Vuforia_Sample_App";
@@ -95,7 +94,8 @@ public class Session implements UpdateCallbackInterface
 
         if (initVuforiaTask != null) {
             String logMessage = "Cannot initialize SDK twice";
-            vuforiaExceptionAR = new ExceptionAR(ExceptionAR.VUFORIA_ALREADY_INITIALIZATED, logMessage);
+            vuforiaExceptionAR = new ExceptionAR(
+                    ExceptionAR.VUFORIA_ALREADY_INITIALIZATED, logMessage);
             Log.e(LOGTAG, logMessage);
         }
         
@@ -105,7 +105,8 @@ public class Session implements UpdateCallbackInterface
                 initVuforiaTask.execute();
             } catch (java.lang.Exception e) {
                 String logMessage = "Initializing Vuforia SDK failed";
-                vuforiaExceptionAR = new ExceptionAR(ExceptionAR.INITIALIZATION_FAILURE, logMessage);
+                vuforiaExceptionAR = new ExceptionAR(
+                        ExceptionAR.INITIALIZATION_FAILURE, logMessage);
                 Log.e(LOGTAG, logMessage);
             }
         }
@@ -115,8 +116,7 @@ public class Session implements UpdateCallbackInterface
         }
     }
 
-    public void startAR(int camera) throws ExceptionAR
-    {
+    public void startAR(int camera) throws ExceptionAR {
         String error;
         if(isCameraRunning) {
         	error = "Camera already running, unable to open again";
@@ -157,8 +157,7 @@ public class Session implements UpdateCallbackInterface
         }
     }
 
-    public void stopAR() throws ExceptionAR
-    {
+    public void stopAR() throws ExceptionAR {
         if (initVuforiaTask != null
             && initVuforiaTask.getStatus() != InitVuforiaTask.Status.FINISHED) {
             initVuforiaTask.cancel(true);
@@ -447,35 +446,28 @@ public class Session implements UpdateCallbackInterface
         }
     }
     
-    private class LoadTrackerTask extends AsyncTask<Void, Integer, Boolean>
-    {
+    private class LoadTrackerTask extends AsyncTask<Void, Integer, Boolean> {
         @Override
-        protected Boolean doInBackground(Void... params)
-        {
-            synchronized (shutdownLock)
-            {
+        protected Boolean doInBackground(Void... params) {
+            synchronized (shutdownLock) {
                 return sessionControl.doLoadTrackersData();
             }
         }
         
         @Override
-        protected void onPostExecute(Boolean result)
-        {
-            
+        protected void onPostExecute(Boolean result) {
             ExceptionAR vuforiaExceptionAR = null;
             
             Log.d(LOGTAG, "LoadTrackerTask.onPostExecute: execution "
                 + (result ? "successful" : "failed"));
             
-            if (!result)
-            {
+            if (!result) {
                 String logMessage = "Failed to load tracker data.";
                 Log.e(LOGTAG, logMessage);
                 vuforiaExceptionAR = new ExceptionAR(
                     ExceptionAR.LOADING_TRACKERS_FAILURE,
                     logMessage);
-            } else
-            {
+            } else {
                 System.gc();
                 Vuforia.registerCallback(Session.this);
                 isStarted = true;

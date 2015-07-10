@@ -26,20 +26,17 @@ public class ExceptionAR extends java.lang.Exception
     private int code = -1;
     private String string = "";
 
-    public ExceptionAR(int code, String description)
-    {
+    public ExceptionAR(int code, String description) {
         super(description);
         this.code = code;
         string = description;
     }
 
-    public int getCode()
-    {
+    public int getCode() {
         return code;
     }
     
-    public String getString()
-    {
+    public String getString() {
         return string;
     }
 }

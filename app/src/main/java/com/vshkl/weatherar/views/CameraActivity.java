@@ -74,17 +74,19 @@ public class CameraActivity extends AppCompatActivity implements Control {
         Log.d(LOGTAG, "onCreate");
         super.onCreate(savedInstanceState);
 
-        Bundle bundle = this.getIntent().getExtras();
-        String weatherStr = bundle.getString("Forecast");
-        Log.v("WEATHER IN CAMERA", weatherStr);
+        if (savedInstanceState == null) {
+            Bundle bundle = this.getIntent().getExtras();
+            String weatherStr = bundle.getString("Forecast");
+            Log.v("WEATHER IN CAMERA", weatherStr);
 
-        session = new Session(this);
-        session.initAR(this, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            session = new Session(this);
+            session.initAR(this, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        textures = new Vector<>();
-        loadTextures(weatherStr);
+            textures = new Vector<>();
+            loadTextures(weatherStr);
 
-        isDroidDevice = android.os.Build.MODEL.toLowerCase().startsWith("droid");
+            isDroidDevice = android.os.Build.MODEL.toLowerCase().startsWith("droid");
+        }
     }
 
     private void loadTextures(String text) {
@@ -113,7 +115,6 @@ public class CameraActivity extends AppCompatActivity implements Control {
             applicationGLView.setVisibility(View.VISIBLE);
             applicationGLView.onResume();
         }
-
     }
 
     @Override
@@ -226,7 +227,7 @@ public class CameraActivity extends AppCompatActivity implements Control {
         cameraButton.setVisibility(View.VISIBLE);
     }
 
-    boolean startUserDefinedTargets()
+    private boolean startUserDefinedTargets()
     {
         Log.d(LOGTAG, "startUserDefinedTargets");
 
@@ -252,7 +253,7 @@ public class CameraActivity extends AppCompatActivity implements Control {
         return true;
     }
 
-    boolean isUserDefinedTargetsRunning() {
+    private boolean isUserDefinedTargetsRunning() {
         TrackerManager trackerManager = TrackerManager.getInstance();
         ObjectTracker objectTracker = (ObjectTracker) trackerManager
                 .getTracker(ObjectTracker.getClassType());
@@ -264,14 +265,14 @@ public class CameraActivity extends AppCompatActivity implements Control {
             {
                 Log.e(LOGTAG, "Quality> " + targetBuilder.getFrameQuality());
                 return (targetBuilder.getFrameQuality()
-                        != ImageTargetBuilder.FRAME_QUALITY.FRAME_QUALITY_NONE) ? true : false;
+                        != ImageTargetBuilder.FRAME_QUALITY.FRAME_QUALITY_NONE);
             }
         }
 
         return false;
     }
 
-    void startBuild() {
+    private void startBuild() {
         TrackerManager trackerManager = TrackerManager.getInstance();
         ObjectTracker objectTracker = (ObjectTracker) trackerManager
                 .getTracker(ObjectTracker.getClassType());
@@ -474,7 +475,7 @@ public class CameraActivity extends AppCompatActivity implements Control {
         }
     }
 
-    public Bitmap createBitmapText(Bitmap bitmap, String text) {
+    private Bitmap createBitmapText(Bitmap bitmap, String text) {
         Canvas canvas = new Canvas(bitmap);
         bitmap.eraseColor(0);
 
@@ -485,6 +486,8 @@ public class CameraActivity extends AppCompatActivity implements Control {
         TextPaint textPaint = new TextPaint();
         textPaint.setTextSize(72);
         textPaint.setAntiAlias(true);
+        textPaint.setFakeBoldText(true);
+        textPaint.setShadowLayer(2.0f, 2.0f, 2.0f, android.R.color.black);
         textPaint.setHinting(Paint.HINTING_ON);
         textPaint.setARGB(0xff, 0xff, 0xff, 0xff);
 

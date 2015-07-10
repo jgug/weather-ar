@@ -16,7 +16,6 @@ public class Utils
     
     private static final String LOGTAG = "Vuforia_Sample_App";
     
-    
     static int initShader(int shaderType, String source) {
         int shader = GLES20.glCreateShader(shaderType);
         if (shader != 0) {
@@ -37,8 +36,7 @@ public class Utils
         
         return shader;
     }
-    
-    
+
     public static int createProgramFromShaderSrc(String vertexShaderSrc, String fragmentShaderSrc) {
         int vertShader = initShader(GLES20.GL_VERTEX_SHADER, vertexShaderSrc);
         int fragShader = initShader(GLES20.GL_FRAGMENT_SHADER,
@@ -73,12 +71,10 @@ public class Utils
         return program;
     }
     
-    
     public static void checkGLError(String op) {
         for (int error = GLES20.glGetError(); error != 0; error = GLES20.glGetError())
             Log.e(LOGTAG, "After operation " + op + " got glError 0x" + Integer.toHexString(error));
     }
-    
     
     // Transforms a screen pixel to a pixel onto the camera image,
     // taking into account e.g. cropping of camera image to fit different aspect
@@ -155,8 +151,7 @@ public class Utils
             cameraDY[0] = (int) (((float) screenDY / (float) scaledUpVideoHeight) * videoHeight);
         }
     }
-    
-    
+
     public static float[] getOrthoMatrix(float nLeft, float nRight,
         float nBottom, float nTop, float nNear, float nFar) {
         float[] nProjMatrix = new float[16];

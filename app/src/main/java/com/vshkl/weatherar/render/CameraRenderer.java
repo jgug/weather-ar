@@ -52,7 +52,7 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
 
     private Text text;
 
-    static final float scale = 30.f;
+    static final float scale = 40.f;
 
     private CameraActivity activity;
 
@@ -85,7 +85,6 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         renderFrame();
     }
 
-
     private void renderFrame() {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
@@ -94,11 +93,6 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         Renderer.getInstance().drawVideoBackground();
 
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-
-//        GLES20.glEnable(GLES20.GL_BLEND);
-//        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-//        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-
         GLES20.glEnable(GLES20.GL_CULL_FACE);
 
         activity.refFreeFrame.render();
@@ -119,7 +113,6 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             GLES20.glEnable(GLES20.GL_BLEND);
             GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
             GLES20.glUseProgram(shaderProgramID);
-//            GLES20.glDisable(GLES20.GL_BLEND);
 
             // Prepare for rendering the frame
             GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT, false, 0, text.getVertices());
@@ -155,15 +148,12 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         Renderer.getInstance().end();
     }
 
-
     private void initRendering() {
         Log.d(LOGTAG, "initRendering");
 
         text = new Text();
 
-//        GLES20.glClearColor(0.0f, 0.0f, 0.0f, Vuforia.requiresAlpha() ? 0.0f : 1.0f);
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
 
         for (Texture t : textures) {
             GLES20.glGenTextures(1, t.mTextureID, 0);

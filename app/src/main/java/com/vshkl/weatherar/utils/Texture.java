@@ -29,7 +29,7 @@ public class Texture {
     public boolean mSuccess = false;
     
     public static Texture loadTextureFromApk(String fileName, AssetManager assets) {
-        InputStream inputStream = null;
+        InputStream inputStream;
         try {
             inputStream = assets.open(fileName, AssetManager.ACCESS_BUFFER);
             
