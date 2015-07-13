@@ -97,16 +97,20 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             Matrix.translateM(modelViewMatrix, 0, 0.0f, 0.0f, scale);
             Matrix.scaleM(modelViewMatrix, 0, scale, scale, scale);
             Matrix.rotateM(modelViewMatrix, 0, 90, 0.0f, 0.0f, scale);
-            Matrix.multiplyMM(modelViewProjection, 0, Session.getProjectionMatrix().getData(), 0, modelViewMatrix, 0);
+            Matrix.multiplyMM(modelViewProjection, 0, Session.getProjectionMatrix().getData(),
+                    0, modelViewMatrix, 0);
 
             GLES20.glEnable(GLES20.GL_BLEND);
             GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
             GLES20.glUseProgram(shaderProgramID);
 
             // Prepare for rendering the frame
-            GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT, false, 0, text.getVertices());
-            GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT, false, 0, text.getNormals());
-            GLES20.glVertexAttribPointer(textureCoordHandle, 2, GLES20.GL_FLOAT, false, 0, text.getTexCoords());
+            GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
+                    false, 0, text.getVertices());
+            GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
+                    false, 0, text.getNormals());
+            GLES20.glVertexAttribPointer(textureCoordHandle, 2, GLES20.GL_FLOAT,
+                    false, 0, text.getTexCoords());
 
             GLES20.glEnableVertexAttribArray(vertexHandle);
             GLES20.glEnableVertexAttribArray(normalHandle);
@@ -120,7 +124,8 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
             GLES20.glUniform1i(texSampler2DHandle, 0);
 
             // Render
-            GLES20.glDrawElements(GLES20.GL_TRIANGLES, text.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT, text.getIndices());
+            GLES20.glDrawElements(GLES20.GL_TRIANGLES, text.getNumObjectIndex(),
+                    GLES20.GL_UNSIGNED_SHORT, text.getIndices());
 
             GLES20.glDisableVertexAttribArray(vertexHandle);
             GLES20.glDisableVertexAttribArray(normalHandle);
@@ -147,14 +152,20 @@ public class CameraRenderer implements GLSurfaceView.Renderer {
         for (Texture t : textures) {
             GLES20.glGenTextures(1, t.mTextureID, 0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, t.mTextureID[0]);
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, t.mWidth, t.mHeight, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, t.mData);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
+                    GLES20.GL_LINEAR);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER,
+                    GLES20.GL_LINEAR);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
+                    GLES20.GL_CLAMP_TO_EDGE);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
+                    GLES20.GL_CLAMP_TO_EDGE);
+            GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, t.mWidth, t.mHeight, 0,
+                    GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, t.mData);
         }
 
-        shaderProgramID = Utils.createProgramFromShaderSrc(FrameShaders.FRAME_VERTEX_SHADER, FrameShaders.FRAME_FRAGMENT_SHADER);
+        shaderProgramID = Utils.createProgramFromShaderSrc(FrameShaders.FRAME_VERTEX_SHADER,
+                FrameShaders.FRAME_FRAGMENT_SHADER);
 
         vertexHandle = GLES20.glGetAttribLocation(shaderProgramID, "vertexPosition");
         normalHandle = GLES20.glGetAttribLocation(shaderProgramID, "vertexNormal");
