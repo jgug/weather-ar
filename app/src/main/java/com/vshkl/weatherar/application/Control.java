@@ -9,13 +9,12 @@ package com.vshkl.weatherar.application;
 
 import com.qualcomm.vuforia.State;
 
-
 public interface Control {
-    
+
     boolean doInitTrackers();
-    
+
     boolean doLoadTrackersData();
-    
+
     boolean doStartTrackers();
 
     boolean doStopTrackers();
@@ -27,5 +26,5 @@ public interface Control {
     void onInitARDone(ExceptionAR e);
 
     void onQCARUpdate(State state);
-    
+
 }

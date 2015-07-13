@@ -1,6 +1,5 @@
 package com.vshkl.weatherar.views;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -35,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
 @EActivity(R.layout.activity_main)
 public class MainActivity extends AppCompatActivity {
@@ -121,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onWeatherError(WeatherLibException e) {
+                e.printStackTrace();
             }
 
             @Override

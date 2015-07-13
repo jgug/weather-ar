@@ -7,12 +7,15 @@ and other countries. Trademarks of QUALCOMM Incorporated are used with permissio
 
 package com.vshkl.weatherar.application;
 
+/**
+ * Exception class for Vuforia application.
+ *
+ * @see java.lang.Exception
+ */
+public class ExceptionAR extends Exception {
 
-public class ExceptionAR extends java.lang.Exception
-{
-    
     private static final long serialVersionUID = 2L;
-    
+
     public static final int INITIALIZATION_FAILURE = 0;
     public static final int VUFORIA_ALREADY_INITIALIZATED = 1;
     public static final int TRACKERS_INITIALIZATION_FAILURE = 2;
@@ -22,7 +25,7 @@ public class ExceptionAR extends java.lang.Exception
     public static final int CAMERA_INITIALIZATION_FAILURE = 6;
     public static final int SET_FOCUS_MODE_FAILURE = 7;
     public static final int ACTIVATE_FLASH_FAILURE = 8;
-    
+
     private int code = -1;
     private String string = "";
 
@@ -35,7 +38,7 @@ public class ExceptionAR extends java.lang.Exception
     public int getCode() {
         return code;
     }
-    
+
     public String getString() {
         return string;
     }

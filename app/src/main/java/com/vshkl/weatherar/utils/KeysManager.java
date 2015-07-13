@@ -19,7 +19,7 @@ public class KeysManager {
      * Method retrieves license key by name from license.properties file
      *
      * @param context is an application context
-     * @param name is a license key name
+     * @param name    is a license key name
      * @return license key as {@link String}
      */
     public static String getKey(Context context, String name) {

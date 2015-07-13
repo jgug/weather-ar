@@ -1,15 +1,7 @@
 package com.vshkl.weatherar.render;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.util.Log;
 
@@ -18,9 +10,6 @@ import com.qualcomm.vuforia.Renderer;
 import com.qualcomm.vuforia.State;
 import com.qualcomm.vuforia.Tool;
 import com.qualcomm.vuforia.TrackableResult;
-import com.qualcomm.vuforia.VIDEO_BACKGROUND_REFLECTION;
-import com.qualcomm.vuforia.Vuforia;
-import com.vshkl.weatherar.R;
 import com.vshkl.weatherar.application.Session;
 import com.vshkl.weatherar.utils.FrameShaders;
 import com.vshkl.weatherar.utils.Text;

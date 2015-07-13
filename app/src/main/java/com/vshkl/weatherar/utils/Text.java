@@ -11,8 +11,7 @@ public class Text extends MeshObject {
     private int indicesNumber = 0;
     private int verticesNumber;
 
-    public Text()
-    {
+    public Text() {
         setVerts();
         setTexCoords();
         setNorms();
@@ -21,9 +20,9 @@ public class Text extends MeshObject {
 
     private void setVerts() {
         double[] PLANE_VERTICES = {-1.0, -1.0, 0.0,
-                                    1.0, -1.0, 0.0,
-                                    1.0,  1.0, 0.0,
-                                   -1.0,  1.0, 0.0};
+                1.0, -1.0, 0.0,
+                1.0, 1.0, 0.0,
+                -1.0, 1.0, 0.0};
         vertBuff = fillBuffer(PLANE_VERTICES);
         verticesNumber = PLANE_VERTICES.length / 3;
     }
