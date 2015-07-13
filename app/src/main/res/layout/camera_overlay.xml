@@ -17,16 +17,42 @@
         android:weightSum="1" >
 
         <ImageButton
-            android:id="@+id/camera_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:id="@+id/flash_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
-        	android:layout_centerHorizontal="true"
+            android:layout_weight="0.25"
+            android:background="@color/transparent"
+            android:contentDescription="@string/content_desc_camera_button"
+            android:onClick="onFlashClick"
+            android:padding="10dp"
+            android:src="@drawable/ic_flash_white"
+            />
+
+        <ImageButton
+            android:id="@+id/camera_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="0.5"
             android:background="@color/transparent"
             android:contentDescription="@string/content_desc_camera_button"
             android:onClick="onCameraClick"
             android:padding="10dp"
             android:src="@drawable/ic_camera_iris"
+            />
+
+        <ImageButton
+            android:id="@+id/focus_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="0.25"
+            android:background="@color/transparent"
+            android:contentDescription="@string/content_desc_camera_button"
+            android:onClick="onFocusClick"
+            android:padding="10dp"
+            android:src="@drawable/ic_image_focus"
             />
 
     </LinearLayout>

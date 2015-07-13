@@ -1,8 +1,10 @@
 package com.vshkl.weatherar.views;
 
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -17,8 +19,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.Window;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.qualcomm.vuforia.CameraDevice;
 import com.qualcomm.vuforia.DataSet;
@@ -36,6 +38,7 @@ import com.vshkl.weatherar.render.CameraRenderer;
 import com.vshkl.weatherar.utils.ApplicationGLView;
 import com.vshkl.weatherar.utils.Texture;
 
+import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 
 import java.util.Vector;
@@ -66,8 +69,17 @@ public class CameraActivity extends AppCompatActivity implements Control {
 
     public RefFreeFrame refFreeFrame;
 
+    boolean isFlashEnabled = false;
+    boolean isAutofocusEnabled = false;
     boolean isDroidDevice = false;
 
+//    @Click(R.id.flash_button)
+//    void flashClick() {
+//        Log.v("FLASH", "FLASH CLICKED");
+//        if(this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+//            CameraDevice.getInstance().setFlashTorchMode(true);
+//        }
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -209,6 +221,30 @@ public class CameraActivity extends AppCompatActivity implements Control {
     public void onCameraClick(View v) {
         if (isUserDefinedTargetsRunning()) {
             startBuild();
+        }
+    }
+
+    public void onFlashClick(View v) {
+        if(this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+            if (!isFlashEnabled) {
+                CameraDevice.getInstance().setFlashTorchMode(true);
+                isFlashEnabled = true;
+            } else {
+                CameraDevice.getInstance().setFlashTorchMode(false);
+                isFlashEnabled = false;
+            }
+        }
+    }
+
+    public void onFocusClick(View v) {
+        if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS)) {
+            if (!isAutofocusEnabled) {
+                CameraDevice.getInstance().setFocusMode(CameraDevice.FOCUS_MODE.FOCUS_MODE_CONTINUOUSAUTO);
+                isAutofocusEnabled = true;
+            } else {
+                CameraDevice.getInstance().setFocusMode(CameraDevice.FOCUS_MODE.FOCUS_MODE_NORMAL);
+                isAutofocusEnabled = false;
+            }
         }
     }
 
